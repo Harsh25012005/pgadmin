@@ -1,50 +1,237 @@
-# Welcome to your Expo app 👋
+# PG Admin - Complete PG Management Solution 🏠
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A comprehensive React Native application built with Expo for managing Paying Guest (PG) accommodations. This app provides a complete solution for PG owners to manage tenants, payments, rooms, complaints, and announcements with both light and dark mode support.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+### 🏠 **Dashboard Overview**
+- Real-time statistics and analytics
+- Quick action buttons for common tasks
+- Recent activity feed
+- Payment alerts and notifications
 
+### 👥 **Tenant Management**
+- Complete tenant profiles with contact information
+- Room assignment and status tracking
+- Deposit and payment history
+- Active/inactive status management
+
+### 💳 **Payment Tracking**
+- Record rent, deposit, and maintenance payments
+- Payment status tracking (paid, pending, overdue)
+- Payment history and receipts
+- Automated payment reminders
+
+### 🏨 **Room Management**
+- Room inventory with detailed information
+- Occupancy status (occupied, vacant, maintenance)
+- Facility management and room types
+- Floor-wise organization
+
+### 📋 **Complaint Management**
+- Tenant complaint submission and tracking
+- Priority levels and category classification
+- Status updates and resolution tracking
+- Communication history
+
+### 📢 **Announcements**
+- Broadcast important notices to tenants
+- Category-based announcements (maintenance, events, rules)
+- Expiry date management
+- Active/inactive status control
+
+### 🎨 **Theme Support**
+- Light and dark mode toggle
+- System theme detection
+- Consistent color scheme across all screens
+- Accessibility-friendly design
+
+### 📊 **Reports & Analytics**
+- Revenue tracking and financial reports
+- Occupancy statistics
+- Payment collection reports
+- Complaint resolution metrics
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- Expo CLI
+- Android Studio (for Android development)
+- Xcode (for iOS development)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd pgadmin
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
+3. **Install additional required packages**
+   ```bash
+   npm install @react-native-async-storage/async-storage@^2.1.0
+   ```
 
+4. **Start the development server**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+5. **Run on your preferred platform**
+   - Press `a` for Android emulator
+   - Press `i` for iOS simulator
+   - Scan QR code with Expo Go app for physical device
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 📱 App Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+```
+app/
+├── (tabs)/                 # Tab navigation screens
+│   ├── index.tsx          # Home/Dashboard
+│   ├── tenants.tsx        # Tenant list
+│   ├── payments.tsx       # Payment list
+│   ├── rooms.tsx          # Room list
+│   └── more.tsx           # More options
+├── tenants/
+│   └── add.tsx            # Add tenant form
+├── payments/
+│   └── add.tsx            # Add payment form
+├── rooms/
+│   └── add.tsx            # Add room form
+└── _layout.tsx            # Root layout
 
-## Get a fresh project
+components/
+├── ui/                    # Reusable UI components
+│   ├── Card.tsx
+│   ├── Button.tsx
+│   ├── Input.tsx
+│   └── StatusBadge.tsx
+└── ...
 
-When you're ready, run:
+contexts/
+├── ThemeContext.tsx       # Theme management
+└── DataContext.tsx        # Data management
 
-```bash
-npm run reset-project
+utils/
+└── sampleData.ts          # Sample data for testing
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🎯 Key Features Implemented
 
-## Learn more
+### ✅ **Completed Features**
+- ✅ Light/Dark theme support with system detection
+- ✅ Complete navigation structure with tab-based layout
+- ✅ Dashboard with real-time statistics and quick actions
+- ✅ Tenant management (list, add forms)
+- ✅ Payment tracking (list, add forms)
+- ✅ Room management (list, add forms)
+- ✅ Data persistence with AsyncStorage
+- ✅ Sample data initialization for testing
+- ✅ Responsive UI components
+- ✅ Form validation and error handling
 
-To learn more about developing your project with Expo, look at the following resources:
+### 🔄 **In Progress**
+- Edit forms for tenants, payments, and rooms
+- Detail view pages for individual records
+- Complaint management system
+- Announcement management
+- Report generation
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### 📋 **Planned Features**
+- Data export/import functionality
+- Push notifications
+- Advanced filtering and search
+- Backup and restore
+- Multi-language support
 
-## Join the community
+## 🎨 Design System
 
-Join our community of developers creating universal apps.
+### **Color Scheme**
+- **Light Mode**: Clean, professional appearance with blue primary colors
+- **Dark Mode**: Easy on the eyes with consistent contrast ratios
+- **Status Colors**: Green (success), Orange (warning), Red (error), Blue (info)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### **Typography**
+- Clear hierarchy with consistent font sizes
+- Accessible text contrast ratios
+- Responsive text scaling
+
+### **Components**
+- Consistent card-based layout
+- Intuitive navigation patterns
+- Touch-friendly button sizes
+- Clear visual feedback
+
+## 📊 Sample Data
+
+The app comes pre-loaded with sample data including:
+- **4 Sample Tenants** with different statuses
+- **6 Sample Rooms** with various configurations
+- **6 Sample Payments** showing different payment types and statuses
+- **4 Sample Complaints** with different priorities and statuses
+- **5 Sample Announcements** for different scenarios
+
+## 🔧 Configuration
+
+### **Theme Configuration**
+The app automatically detects system theme preference and allows manual override:
+```typescript
+// Available themes: 'light', 'dark', 'system'
+const { theme, setTheme, isDark } = useTheme();
+```
+
+### **Data Management**
+All data is stored locally using AsyncStorage and automatically synced:
+```typescript
+const { tenants, addTenant, updateTenant, deleteTenant } = useData();
+```
+
+## 🚀 Deployment
+
+### **Development Build**
+```bash
+npx expo run:android
+npx expo run:ios
+```
+
+### **Production Build**
+```bash
+npx expo build:android
+npx expo build:ios
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [Expo](https://expo.dev/)
+- UI components inspired by modern design principles
+- Icons provided by [Ionicons](https://ionic.io/ionicons)
+
+## 📞 Support
+
+For support and questions:
+- Create an issue in the repository
+- Check the documentation
+- Review the sample code and comments
+
+---
+
+**Happy PG Management! 🏠✨**
