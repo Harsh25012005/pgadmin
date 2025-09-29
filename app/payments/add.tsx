@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { useTheme } from '../../contexts/ThemeContext';
 import { useData } from '../../contexts/DataContext';
-import { Card } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
 
 export default function AddPaymentScreen() {
   const { colors } = useTheme();
@@ -25,6 +22,9 @@ export default function AddPaymentScreen() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [tenantSearchQuery, setTenantSearchQuery] = useState('');
+  const [showTenantDropdown, setShowTenantDropdown] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState<any>(null);
 
   const paymentTypes = [
     { value: 'rent', label: 'Rent', icon: 'home' },
@@ -38,6 +38,32 @@ export default function AddPaymentScreen() {
     { value: 'paid', label: 'Paid', color: '#34C759' },
     { value: 'overdue', label: 'Overdue', color: '#FF3B30' },
   ];
+
+  // Filter tenants based on search query
+  const filteredTenants = tenants.filter(tenant =>
+    tenant.name.toLowerCase().includes(tenantSearchQuery.toLowerCase()) ||
+    tenant.email.toLowerCase().includes(tenantSearchQuery.toLowerCase()) ||
+    tenant.roomNumber.toLowerCase().includes(tenantSearchQuery.toLowerCase())
+  );
+
+  const handleTenantSelect = (tenant: any) => {
+    setSelectedTenant(tenant);
+    setTenantSearchQuery(tenant.name);
+    setFormData(prev => ({ ...prev, tenantId: tenant.id }));
+    setShowTenantDropdown(false);
+    if (errors.tenantId) {
+      setErrors(prev => ({ ...prev, tenantId: '' }));
+    }
+  };
+
+  const handleTenantSearchChange = (query: string) => {
+    setTenantSearchQuery(query);
+    setShowTenantDropdown(query.length > 0);
+    if (query.length === 0) {
+      setSelectedTenant(null);
+      setFormData(prev => ({ ...prev, tenantId: '' }));
+    }
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -97,68 +123,103 @@ export default function AddPaymentScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Clean Header */}
+      <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Text style={[styles.headerTitle, { color: '#FFFFFF' }]}>Add Payment</Text>
-          <Text style={[styles.headerSubtitle, { color: '#FFFFFF' }]}>
-            Record new payment
+          <View style={styles.headerTop}>
+            <TouchableOpacity
+              style={styles.backIcon}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Add Payment</Text>
+            <View style={styles.headerSpacer} />
+          </View>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            Record new payment transaction
           </Text>
         </View>
       </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Card style={styles.formCard}>
+        <View style={styles.formSection}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Payment Details</Text>
           
-          {/* Tenant Selection */}
-          <View style={styles.inputContainer}>
+          {/* Tenant Search */}
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.label, { color: colors.text }]}>
               Select Tenant <Text style={{ color: colors.error }}>*</Text>
             </Text>
-            <ScrollView style={styles.tenantScroll} showsVerticalScrollIndicator={false}>
-              {tenants.map((tenant) => (
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={[styles.searchInput, { color: colors.text, borderColor: colors.border }]}
+                value={tenantSearchQuery}
+                onChangeText={handleTenantSearchChange}
+                placeholder="Search tenant by name, email, or room number..."
+                placeholderTextColor={colors.textSecondary}
+                onFocus={() => setShowTenantDropdown(tenantSearchQuery.length > 0)}
+              />
+              <Ionicons name="search-outline" size={16} color={colors.textSecondary} style={styles.searchIcon} />
+            </View>
+            
+            {/* Selected Tenant Display */}
+            {selectedTenant && (
+              <View style={[styles.selectedTenant, { backgroundColor: `${colors.primary}15`, borderColor: colors.primary }]}>
+                <View style={styles.tenantInfo}>
+                  <Text style={[styles.tenantName, { color: colors.text }]}>{selectedTenant.name}</Text>
+                  <Text style={[styles.tenantDetails, { color: colors.textSecondary }]}>
+                    Room {selectedTenant.roomNumber} • {selectedTenant.email}
+                  </Text>
+                </View>
                 <TouchableOpacity
-                  key={tenant.id}
-                  style={[
-                    styles.tenantOption,
-                    {
-                      backgroundColor: formData.tenantId === tenant.id 
-                        ? `${colors.primary}15` 
-                        : colors.surface,
-                      borderColor: formData.tenantId === tenant.id 
-                        ? colors.primary 
-                        : colors.border,
-                    }
-                  ]}
-                  onPress={() => updateFormData('tenantId', tenant.id)}
+                  onPress={() => {
+                    setSelectedTenant(null);
+                    setTenantSearchQuery('');
+                    setFormData(prev => ({ ...prev, tenantId: '' }));
+                  }}
                 >
-                  <View style={styles.tenantInfo}>
-                    <Text style={[styles.tenantName, { color: colors.text }]}>{tenant.name}</Text>
-                    <Text style={[styles.tenantDetails, { color: colors.textSecondary }]}>
-                      Room {tenant.roomNumber} • {tenant.email}
-                    </Text>
-                  </View>
-                  {formData.tenantId === tenant.id && (
-                    <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-                  )}
+                  <Ionicons name="close-circle-outline" size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
+              </View>
+            )}
+
+            {/* Dropdown Results */}
+            {showTenantDropdown && filteredTenants.length > 0 && (
+              <View style={[styles.dropdown, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <ScrollView style={styles.dropdownScroll} showsVerticalScrollIndicator={false}>
+                  {filteredTenants.slice(0, 5).map((tenant) => (
+                    <TouchableOpacity
+                      key={tenant.id}
+                      style={[styles.dropdownItem, { borderBottomColor: colors.border }]}
+                      onPress={() => handleTenantSelect(tenant)}
+                    >
+                      <View style={styles.tenantInfo}>
+                        <Text style={[styles.tenantName, { color: colors.text }]}>{tenant.name}</Text>
+                        <Text style={[styles.tenantDetails, { color: colors.textSecondary }]}>
+                          Room {tenant.roomNumber} • {tenant.email}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {showTenantDropdown && filteredTenants.length === 0 && tenantSearchQuery.length > 0 && (
+              <View style={[styles.noResults, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Text style={[styles.noResultsText, { color: colors.textSecondary }]}>
+                  No tenants found matching "{tenantSearchQuery}"
+                </Text>
+              </View>
+            )}
+
             {errors.tenantId && (
               <Text style={[styles.errorText, { color: colors.error }]}>{errors.tenantId}</Text>
             )}
           </View>
 
           {/* Payment Type */}
-          <View style={styles.inputContainer}>
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.label, { color: colors.text }]}>Payment Type</Text>
             <View style={styles.typeContainer}>
               {paymentTypes.map((type) => (
@@ -169,7 +230,7 @@ export default function AddPaymentScreen() {
                     {
                       backgroundColor: formData.type === type.value 
                         ? colors.primary 
-                        : colors.surface,
+                        : 'transparent',
                       borderColor: formData.type === type.value 
                         ? colors.primary 
                         : colors.border,
@@ -195,27 +256,43 @@ export default function AddPaymentScreen() {
             </View>
           </View>
 
-          <Input
-            label="Amount"
-            value={formData.amount}
-            onChangeText={(value) => updateFormData('amount', value)}
-            placeholder="Enter amount"
-            keyboardType="numeric"
-            error={errors.amount}
-            required
-          />
+          {/* Amount Input */}
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Amount <Text style={{ color: colors.error }}>*</Text>
+            </Text>
+            <TextInput
+              style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+              value={formData.amount}
+              onChangeText={(value) => updateFormData('amount', value)}
+              placeholder="Enter amount"
+              placeholderTextColor={colors.textSecondary}
+              keyboardType="numeric"
+            />
+            {errors.amount && (
+              <Text style={[styles.errorText, { color: colors.error }]}>{errors.amount}</Text>
+            )}
+          </View>
 
-          <Input
-            label="Due Date"
-            value={formData.dueDate}
-            onChangeText={(value) => updateFormData('dueDate', value)}
-            placeholder="YYYY-MM-DD"
-            error={errors.dueDate}
-            required
-          />
+          {/* Due Date Input */}
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Due Date <Text style={{ color: colors.error }}>*</Text>
+            </Text>
+            <TextInput
+              style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+              value={formData.dueDate}
+              onChangeText={(value) => updateFormData('dueDate', value)}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor={colors.textSecondary}
+            />
+            {errors.dueDate && (
+              <Text style={[styles.errorText, { color: colors.error }]}>{errors.dueDate}</Text>
+            )}
+          </View>
 
           {/* Payment Status */}
-          <View style={styles.inputContainer}>
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.label, { color: colors.text }]}>Status</Text>
             <View style={styles.statusContainer}>
               {paymentStatuses.map((status) => (
@@ -226,7 +303,7 @@ export default function AddPaymentScreen() {
                     {
                       backgroundColor: formData.status === status.value 
                         ? `${status.color}15` 
-                        : colors.surface,
+                        : 'transparent',
                       borderColor: formData.status === status.value 
                         ? status.color 
                         : colors.border,
@@ -248,41 +325,53 @@ export default function AddPaymentScreen() {
           </View>
 
           {formData.status === 'paid' && (
-            <Input
-              label="Paid Date"
-              value={formData.paidDate}
-              onChangeText={(value) => updateFormData('paidDate', value)}
-              placeholder="YYYY-MM-DD"
-              error={errors.paidDate}
-              required
-            />
+            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Paid Date <Text style={{ color: colors.error }}>*</Text>
+              </Text>
+              <TextInput
+                style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+                value={formData.paidDate}
+                onChangeText={(value) => updateFormData('paidDate', value)}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={colors.textSecondary}
+              />
+              {errors.paidDate && (
+                <Text style={[styles.errorText, { color: colors.error }]}>{errors.paidDate}</Text>
+              )}
+            </View>
           )}
 
-          <Input
-            label="Description"
-            value={formData.description}
-            onChangeText={(value) => updateFormData('description', value)}
-            placeholder="Enter description (optional)"
-            multiline
-            numberOfLines={3}
-          />
-        </Card>
+          {/* Description Input */}
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.label, { color: colors.text }]}>Description</Text>
+            <TextInput
+              style={[styles.textArea, { color: colors.text, borderColor: colors.border }]}
+              value={formData.description}
+              onChangeText={(value) => updateFormData('description', value)}
+              placeholder="Enter description (optional)"
+              placeholderTextColor={colors.textSecondary}
+              multiline
+              numberOfLines={3}
+            />
+          </View>
+        </View>
 
         <View style={styles.buttonContainer}>
-          <Button
-            title="Cancel"
+          <TouchableOpacity
+            style={[styles.cancelButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => router.back()}
-            variant="outline"
-            style={styles.cancelButton}
-          />
-          <Button
-            title="Add Payment"
+          >
+            <Text style={[styles.cancelButtonText, { color: colors.text }]}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.submitButton, { backgroundColor: colors.primary }]}
             onPress={handleSubmit}
-            style={styles.submitButton}
-          />
+          >
+            <Text style={styles.submitButtonText}>Add Payment</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
   );
 }
 
@@ -290,56 +379,133 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  
+  // Clean Header
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 50,
-  },
-  backButton: {
-    marginRight: 16,
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   headerContent: {
-    flex: 1,
+    gap: 4,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  backIcon: {
+    marginRight: 12,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '600',
+    flex: 1,
+  },
+  headerSpacer: {
+    width: 36,
   },
   headerSubtitle: {
     fontSize: 14,
-    opacity: 0.8,
+    marginLeft: 36,
   },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  formCard: {
-    marginBottom: 16,
+  
+  // Form Section
+  formSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 16,
   },
-  inputContainer: {
+  
+  // Cards
+  card: {
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16,
     marginBottom: 16,
   },
+  
   label: {
     fontSize: 14,
     fontWeight: '500',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  tenantScroll: {
-    maxHeight: 200,
+  
+  // Input Fields
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
   },
-  tenantOption: {
+  textArea: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  
+  // Tenant Search
+  searchContainer: {
+    position: 'relative',
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    paddingRight: 40,
+    fontSize: 14,
+  },
+  searchIcon: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+  },
+  selectedTenant: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    marginBottom: 8,
+    marginTop: 8,
+  },
+  dropdown: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 4,
+    maxHeight: 200,
+    zIndex: 1000,
+  },
+  dropdownScroll: {
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+  },
+  noResults: {
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 4,
+    alignItems: 'center',
+  },
+  noResultsText: {
+    fontSize: 14,
+    fontStyle: 'italic',
   },
   tenantInfo: {
     flex: 1,
@@ -352,6 +518,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  
+  // Payment Type
   typeContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -370,6 +538,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  
+  // Status Selection
   statusContainer: {
     flexDirection: 'row',
     gap: 8,
@@ -385,20 +555,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  
+  // Error Text
   errorText: {
     fontSize: 12,
     marginTop: 4,
   },
+  
+  // Buttons
   buttonContainer: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 20,
-    marginBottom: 40,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   cancelButton: {
     flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
   submitButton: {
     flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FFFFFF',
   },
 });

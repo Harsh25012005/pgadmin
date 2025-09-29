@@ -12,7 +12,7 @@ export default function TenantsScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'active', 'inactive'
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
 
   const filteredTenants = tenants.filter(tenant => {
     const matchesSearch = tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -46,55 +46,45 @@ export default function TenantsScreen() {
 
       {/* Search Bar */}
       <View style={styles.searchSection}>
-        <View style={styles.searchRow}>
-          <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Ionicons name="search-outline" size={16} color={colors.textSecondary} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.text }]}
-              placeholder="Search tenants..."
-              placeholderTextColor={colors.textSecondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-          <TouchableOpacity
-            style={[styles.filterButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            onPress={() => setShowFilters(!showFilters)}
-          >
-            <Ionicons name="filter-outline" size={16} color={colors.text} />
-          </TouchableOpacity>
+        <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Ionicons name="search-outline" size={16} color={colors.textSecondary} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder="Search tenants..."
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
         </View>
         
-        {/* Filter Options */}
-        {showFilters && (
-          <View style={styles.filtersContainer}>
-            <Text style={[styles.filterLabel, { color: colors.text }]}>Status:</Text>
-            <View style={styles.filterOptions}>
-              {['all', 'active', 'inactive'].map((status) => (
-                <TouchableOpacity
-                  key={status}
-                  style={[
-                    styles.filterOption,
-                    {
-                      backgroundColor: statusFilter === status ? colors.primary : colors.surface,
-                      borderColor: colors.border,
-                    }
-                  ]}
-                  onPress={() => setStatusFilter(status)}
-                >
-                  <Text style={[
-                    styles.filterOptionText,
-                    {
-                      color: statusFilter === status ? '#FFFFFF' : colors.text,
-                    }
-                  ]}>
-                    {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+        {/* Filter Options - Always Visible */}
+        <View style={styles.filtersContainer}>
+          <Text style={[styles.filterLabel, { color: colors.text }]}>Status:</Text>
+          <View style={styles.filterOptions}>
+            {['all', 'active', 'inactive'].map((status) => (
+              <TouchableOpacity
+                key={status}
+                style={[
+                  styles.filterOption,
+                  {
+                    backgroundColor: statusFilter === status ? colors.primary : colors.surface,
+                    borderColor: colors.border,
+                  }
+                ]}
+                onPress={() => setStatusFilter(status)}
+              >
+                <Text style={[
+                  styles.filterOptionText,
+                  {
+                    color: statusFilter === status ? '#FFFFFF' : colors.text,
+                  }
+                ]}>
+                  {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        )}
+        </View>
       </View>
 
       {/* Tenants List */}
@@ -182,13 +172,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 24,
   },
-  searchRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
   searchContainer: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -196,19 +180,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     gap: 8,
+    marginBottom: 16,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
     height: '100%',
-  },
-  filterButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   
   // Filter Section
